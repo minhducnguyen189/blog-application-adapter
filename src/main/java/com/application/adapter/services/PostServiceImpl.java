@@ -5,18 +5,35 @@ import com.application.adapter.Utilities.MapperUtil;
 import com.application.adapter.models.entities.PostEntity;
 import com.application.adapter.models.request.Post;
 import com.application.adapter.models.response.PostResponse;
+import com.application.adapter.repositories.PostPagingRepository;
 import com.application.adapter.repositories.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
-public class PostServiceImpl implements PostService<String, Post, PostResponse> {
+public class PostServiceImpl implements PostService<String, Post, PostResponse, Integer, List<PostResponse>> {
 
+    @Value("${post.page.size}")
+    private int pageSize;
+
+    @Value("${post.page.sort.default}")
+    private String sortByDefault;
 
     @Autowired
     private PostRepository repository;
+
+    @Autowired
+    private PostPagingRepository pagingRepository;
 
     @Override
     public String createPost(Post post) {
@@ -24,7 +41,7 @@ public class PostServiceImpl implements PostService<String, Post, PostResponse> 
         entity.setId(UUID.randomUUID().toString());
         entity.setCreatedDate(DateUtil.getRecentDate());
         entity.setLastModifiedDate(DateUtil.getRecentDate());
-        MapperUtil.post2Entity(entity, post);
+        MapperUtil.convertObject(post, entity);
         repository.save(entity);
         return entity.getId();
     }
@@ -34,10 +51,31 @@ public class PostServiceImpl implements PostService<String, Post, PostResponse> 
         PostEntity entity = repository.getOne(id);
         if(id.equalsIgnoreCase(entity.getId())) {
             PostResponse response = new PostResponse();
-            MapperUtil.entity2PostResponse(entity, response);
+            MapperUtil.convertObject(entity, response);
             return response;
         }
         throw new NullPointerException("Not found, the id is not correct!");
+    }
+
+    @Override
+    public void updatePostById(String id, Post post) {
+        PostEntity entity = repository.getOne(id);
+        entity.setLastModifiedDate(DateUtil.getRecentDate());
+        MapperUtil.convertObject(post, entity);
+        repository.save(entity);
+    }
+
+    @Override
+    public List<PostResponse> getPosts(Integer startNumber, String sortKey) {
+        Pageable pageable;
+        if(Optional.ofNullable(sortKey).isPresent()) {
+             pageable = PageRequest.of(startNumber, pageSize, Sort.by(sortKey).descending());
+        } else {
+             pageable = PageRequest.of(startNumber, pageSize, Sort.by(sortByDefault).descending());
+        }
+        Page<PostEntity> page = pagingRepository.findAll(pageable);
+        List<PostEntity> entities = page.getContent();
+        return entities.stream().map(e -> MapperUtil.mappingObject(e, new PostResponse())).collect(Collectors.toList());
     }
 
 }

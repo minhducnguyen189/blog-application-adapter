@@ -2,13 +2,14 @@ package com.application.adapter.services;
 
 import com.application.adapter.Utilities.DateUtil;
 import com.application.adapter.Utilities.MapperUtil;
+import com.application.adapter.models.env.PageEnv;
 import com.application.adapter.models.entities.PostEntity;
 import com.application.adapter.models.request.Post;
 import com.application.adapter.models.response.PostResponse;
 import com.application.adapter.repositories.PostPagingRepository;
 import com.application.adapter.repositories.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,17 +24,16 @@ import java.util.stream.Collectors;
 @Service
 public class PostServiceImpl implements PostService<String, Post, PostResponse, Integer, List<PostResponse>> {
 
-    @Value("${post.page.size}")
-    private int pageSize;
-
-    @Value("${post.page.sort.default}")
-    private String sortByDefault;
-
-    @Autowired
+    private ApplicationContext context;
     private PostRepository repository;
+    private PostPagingRepository pagingRepository;
 
     @Autowired
-    private PostPagingRepository pagingRepository;
+    public PostServiceImpl(ApplicationContext context, PostRepository repository, PostPagingRepository pagingRepository) {
+        this.context = context;
+        this.repository = repository;
+        this.pagingRepository = pagingRepository;
+    }
 
     @Override
     public String createPost(Post post) {
@@ -67,11 +67,12 @@ public class PostServiceImpl implements PostService<String, Post, PostResponse, 
 
     @Override
     public List<PostResponse> getPosts(Integer startNumber, String sortKey) {
+        PageEnv pageEnv = context.getBean(PageEnv.class);
         Pageable pageable;
         if(Optional.ofNullable(sortKey).isPresent()) {
-             pageable = PageRequest.of(startNumber, pageSize, Sort.by(sortKey).descending());
+             pageable = PageRequest.of(startNumber, pageEnv.getSize(), Sort.by(sortKey).descending());
         } else {
-             pageable = PageRequest.of(startNumber, pageSize, Sort.by(sortByDefault).descending());
+             pageable = PageRequest.of(startNumber, pageEnv.getSize(), Sort.by(pageEnv.getDefaultKey()).descending());
         }
         Page<PostEntity> page = pagingRepository.findAll(pageable);
         List<PostEntity> entities = page.getContent();

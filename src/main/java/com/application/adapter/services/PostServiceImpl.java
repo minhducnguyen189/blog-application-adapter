@@ -1,7 +1,7 @@
 package com.application.adapter.services;
 
-import com.application.adapter.Utilities.DateUtil;
-import com.application.adapter.Utilities.MapperUtil;
+import com.application.adapter.utilities.DateUtil;
+import com.application.adapter.utilities.MapperUtil;
 import com.application.adapter.models.env.PageEnv;
 import com.application.adapter.models.entities.PostEntity;
 import com.application.adapter.models.request.Post;

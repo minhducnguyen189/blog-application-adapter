@@ -1,12 +1,14 @@
-package com.application.adapter.Utilities;
+package com.application.adapter.utilities;
 
-import com.application.adapter.Constants.Constant;
+import com.application.adapter.constants.Constant;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 public class DateUtil {
+
+    private DateUtil() {}
 
     public static String getRecentDate() {
         DateTimeFormatter formatter =  DateTimeFormatter.ofPattern(Constant.DATE_TIME_FORMAT);

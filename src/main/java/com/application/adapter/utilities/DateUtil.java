@@ -12,7 +12,7 @@ public class DateUtil {
 
     public static String getRecentDate() {
         DateTimeFormatter formatter =  DateTimeFormatter.ofPattern(Constant.DATE_TIME_FORMAT);
-        ZoneId zoneId = ZoneId.of("Asia/Ho_Chi_Minh");
+        ZoneId zoneId = ZoneId.of(Constant.ZONE_ID);
         LocalDateTime localDateTime = LocalDateTime.now(zoneId);
         return localDateTime.format(formatter);
     }

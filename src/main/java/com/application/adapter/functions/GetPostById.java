@@ -1,5 +1,6 @@
 package com.application.adapter.functions;
 
+import com.application.adapter.exception.ApiException;
 import com.application.adapter.models.entities.PostEntity;
 import com.application.adapter.models.response.PostResponse;
 import com.application.adapter.repositories.PostRepository;
@@ -18,12 +19,13 @@ public class GetPostById implements Function<String, PostResponse> {
 
     @Override
     public PostResponse apply(String id) {
-        PostEntity entity = repository.getOne(id);
-        if(id.equalsIgnoreCase(entity.getId())) {
+        try {
+            PostEntity entity = repository.getOne(id);
             PostResponse response = new PostResponse();
             MapperUtil.convertObject(entity, response);
             return response;
+        } catch (RuntimeException ex) {
+            throw new ApiException("Not found, the id is not existed!", ex);
         }
-        throw new NullPointerException("Not found, the id is not correct!");
     }
 }

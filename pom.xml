@@ -23,7 +23,7 @@
             **/constants/*
         </sonar.exclusions>
         <jacoco.version>0.8.3</jacoco.version>
-
+        <eureka.client.version>2.2.3.RELEASE</eureka.client.version>
     </properties>
 
     <dependencies>
@@ -51,6 +51,13 @@
             <version>1.2.0</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+            <version>${eureka.client.version}</version>
+        </dependency>
+
     </dependencies>
 
     <build>
